@@ -6,6 +6,7 @@ import { faCirclePlay,
          faForwardStep,
 } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
+import VolumeControl from "./VolumeControl";
 
 // Função para formatar o tempo em minutos:segundos
 const formatTime = (timeInSeconds) => {
@@ -21,6 +22,7 @@ const Player = ({ duration, randomIdFromArtist, randomId2FromArtist, audio }) =>
   const [currentTime, setCurrentTime] = useState(0); // Inicializamos o estado de currentTime
   const [durationInSeconds, setDurationInSeconds] = useState(0); // Inicializamos a duração
 
+
   // Função Play/Pause
   const playPause = () => {
     if (audioPlayer.current) {
@@ -31,6 +33,18 @@ const Player = ({ duration, randomIdFromArtist, randomId2FromArtist, audio }) =>
       }
     }
     setIsPlaying(!isPlaying);
+  };
+
+  const handleProgressClick = (event) => {
+    if (audioPlayer.current) {
+      const bar = event.currentTarget; // Obtém a referência da barra
+      const clickX = event.nativeEvent.offsetX; // Posição do clique
+      const barWidth = bar.clientWidth; // Largura total da barra
+  
+      const newTime = (clickX / barWidth) * audioPlayer.current.duration;
+      audioPlayer.current.currentTime = newTime; // Atualiza a posição da música
+      setCurrentTime(newTime); // Atualiza o estado
+    }
   };
 
   // Atualiza o tempo atual e a barra de progresso a cada segundo
@@ -82,9 +96,8 @@ const Player = ({ duration, randomIdFromArtist, randomId2FromArtist, audio }) =>
         {/* Exibe o tempo atual da música */}
         <p>{formattedCurrentTime}</p>
 
-        <div className="player__bar">
-          {/* Barra de progresso */}
-          <div ref={progressBar} className="player__progress"></div>
+        <div className="player__bar" onClick={handleProgressClick}>
+            <div ref={progressBar} className="player__bar-progress"></div>
         </div>
 
         {/* Exibe a duração total formatada */}
@@ -92,6 +105,9 @@ const Player = ({ duration, randomIdFromArtist, randomId2FromArtist, audio }) =>
       </div>
 
       <audio ref={audioPlayer} src={audio} />
+
+      <VolumeControl audioRef={audioPlayer} />
+
     </div>
   );
 };
