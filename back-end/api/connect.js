@@ -1,16 +1,23 @@
 //  JavaScript assincrono
 // await async
 
-import {MongoClient} from "mongodb"
+import { MongoClient } from "mongodb";
 
-const URI  = "mongodb+srv://projects:130827@cluster0.mzijo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+const URI = "mongodb+srv://projects:130827@cluster0.mzijo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 const client = new MongoClient(URI);
 
-export const db= client.db("Spotify");
+async function connectDB() {
+    try {
+        await client.connect();
+        console.log("✅ Conectado ao MongoDB!");
+    } catch (error) {
+        console.error("❌ Erro ao conectar no MongoDB:", error);
+    }
+}
 
-// const songCollection = await db.collection('songs').find({}).toArray();
+await connectDB(); // Isso garante que o banco está pronto antes de exportar.
 
+export const db = client.db("Spotify");
 
-// console.log(songCollection);
 
