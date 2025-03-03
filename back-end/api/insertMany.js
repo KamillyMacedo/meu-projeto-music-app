@@ -15,6 +15,9 @@ async function seedDatabase() {
         return newSongsObj;
     });
 
+    await db.collection('artists').deleteMany({});  // Limpar antes de inserir (opcional)
+    await db.collection('songs').deleteMany({});    // Limpar antes de inserir (opcional)
+
     const responseSongs = await db.collection('songs').insertMany(newSongsArray);
     const responseArtists = await db.collection('artists').insertMany(newArtistsArray);
 
