@@ -12,6 +12,10 @@ import { db, connectDB } from "./connect.js";  // <- Traz a função connectDB t
 const app = express();
 const PORT = process.env.PORT || 3010;
 
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor rodando na PORTA ${PORT}`);
+});
+
 app.use(cors());
 
 // Rota inicial
