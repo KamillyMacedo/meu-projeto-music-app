@@ -5,28 +5,52 @@
 // Endpoint - uma rota que pode ser acessada pela API
 // mongo - banco de dados nao relacional 
 
-import express from "express"
+import express from "express";
 import cors from "cors";
-import { db } from "./connect.js";
+import { db, connectDB } from "./connect.js";  // <- Traz a função connectDB também
 
 const app = express();
 const PORT = process.env.PORT || 3010;
 
 app.use(cors());
 
-app.get("/", (resquest, response) => {
-    response.send ("Só vamos trabalhar com os endpoints '/artists' e '/songs");
+// Rota inicial
+app.get("/", (request, response) => {   // Corrigido resquest para request
+    response.send("Só vamos trabalhar com os endpoints '/artists' e '/songs'");
 });
 
-app.get("/artists", async (resquest, response) => {
-    response.send (await db.collection('artists').find({}).toArray());
+// Rota para pegar artistas
+app.get("/artists", async (request, response) => {  // Corrigido resquest para request
+    try {
+        const artists = await db.collection('artists').find({}).toArray();
+        response.json(artists);
+    } catch (error) {
+        response.status(500).send("Erro ao buscar artistas");
+    }
 });
 
-app.get("/songs", async (resquest, response) => {
-    response.send (await db.collection('songs').find({}).toArray());
+// Rota para pegar músicas
+app.get("/songs", async (request, response) => {  // Corrigido resquest para request
+    try {
+        const songs = await db.collection('songs').find({}).toArray();
+        response.json(songs);
+    } catch (error) {
+        response.status(500).send("Erro ao buscar músicas");
+    }
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor esta escutando na PORT ${PORT}`)
-});
+// Função para iniciar o servidor após conexão com banco
+async function startServer() {
+    try {
+        await connectDB();  // <- Garantir conexão antes do listen
+        app.listen(PORT, () => {
+            console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+        });
+    } catch (error) {
+        console.error("❌ Erro ao iniciar servidor:", error);
+    }
+}
+
+startServer();
+
 
