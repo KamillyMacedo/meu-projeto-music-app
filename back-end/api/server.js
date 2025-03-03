@@ -10,7 +10,7 @@ import cors from "cors";
 import { db } from "./connect.js";
 
 const app = express();
-const PORT = 3005;
+const PORT = process.env.PORT || 3010;
 
 app.use(cors());
 
