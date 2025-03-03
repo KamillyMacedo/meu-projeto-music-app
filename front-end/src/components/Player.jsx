@@ -1,14 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCirclePlay, 
-         faCirclePause,
-         faBackwardStep, 
-         faForwardStep,
-} from '@fortawesome/free-solid-svg-icons';
+import { faCirclePlay, faCirclePause, faBackwardStep, faForwardStep } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import VolumeControl from "./VolumeControl";
 
-// Função para formatar o tempo em minutos:segundos
 const formatTime = (timeInSeconds) => {
   const minutes = Math.floor(timeInSeconds / 60).toString().padStart(2, '0');
   const seconds = Math.floor(timeInSeconds % 60).toString().padStart(2, '0');
@@ -16,14 +11,45 @@ const formatTime = (timeInSeconds) => {
 };
 
 const Player = ({ duration, randomIdFromArtist, randomId2FromArtist, audio }) => {
-  const audioPlayer = useRef(null); // Garantindo que a referência esteja inicializada
-  const progressBar = useRef(null); // Referência da barra de progresso
+  const audioPlayer = useRef(null);
+  const progressBar = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0); // Inicializamos o estado de currentTime
-  const [durationInSeconds, setDurationInSeconds] = useState(0); // Inicializamos a duração
+  const [currentTime, setCurrentTime] = useState(0);
+  const [durationInSeconds, setDurationInSeconds] = useState(0);
 
+  // Atualiza a duração da nova música
+  useEffect(() => {
+    if (audioPlayer.current) {
+      audioPlayer.current.load();
+      audioPlayer.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(() => {
+        setIsPlaying(false);
+      });
 
-  // Função Play/Pause
+      audioPlayer.current.onloadedmetadata = () => {
+        setDurationInSeconds(audioPlayer.current.duration);
+      };
+    }
+  }, [audio]);
+
+  useEffect(() => {
+    if (isPlaying && audioPlayer.current) {
+      const intervalId = setInterval(() => {
+        if (audioPlayer.current) {
+          const current = audioPlayer.current.currentTime;
+          setCurrentTime(current);
+          const progressPercent = (current / audioPlayer.current.duration) * 100;
+          if (progressBar.current) {
+            progressBar.current.style.width = `${progressPercent}%`;
+          }
+        }
+      }, 1000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [isPlaying]);
+
   const playPause = () => {
     if (audioPlayer.current) {
       if (isPlaying) {
@@ -37,38 +63,16 @@ const Player = ({ duration, randomIdFromArtist, randomId2FromArtist, audio }) =>
 
   const handleProgressClick = (event) => {
     if (audioPlayer.current) {
-      const bar = event.currentTarget; // Obtém a referência da barra
-      const clickX = event.nativeEvent.offsetX; // Posição do clique
-      const barWidth = bar.clientWidth; // Largura total da barra
-  
+      const bar = event.currentTarget;
+      const clickX = event.nativeEvent.offsetX;
+      const barWidth = bar.clientWidth;
+
       const newTime = (clickX / barWidth) * audioPlayer.current.duration;
-      audioPlayer.current.currentTime = newTime; // Atualiza a posição da música
-      setCurrentTime(newTime); // Atualiza o estado
+      audioPlayer.current.currentTime = newTime;
+      setCurrentTime(newTime);
     }
   };
 
-  // Atualiza o tempo atual e a barra de progresso a cada segundo
-  useEffect(() => {
-    if (audioPlayer.current) {
-      const intervalId = setInterval(() => {
-        const current = audioPlayer.current.currentTime;
-        setCurrentTime(current); // Atualiza o tempo atual
-        const progressPercent = (current / audioPlayer.current.duration) * 100;
-        if (progressBar.current) {
-          progressBar.current.style.width = `${progressPercent}%`; // Atualiza a largura da barra de progresso
-        }
-      }, 1000);
-
-      // Obtém a duração total da música (convertida para segundos)
-      audioPlayer.current.onloadedmetadata = () => {
-        setDurationInSeconds(audioPlayer.current.duration); // Define a duração em segundos
-      };
-
-      return () => clearInterval(intervalId);
-    }
-  }, [isPlaying]); // O useEffect será re-executado quando 'isPlaying' mudar
-
-  // Formatar duração total e tempo atual
   const formattedDuration = formatTime(durationInSeconds);
   const formattedCurrentTime = formatTime(currentTime);
 
@@ -81,9 +85,9 @@ const Player = ({ duration, randomIdFromArtist, randomId2FromArtist, audio }) =>
 
         <Link>
           <FontAwesomeIcon 
-            className="player__icon--play" 
-            icon={isPlaying ? faCirclePause : faCirclePlay} // Alterna entre play e pause
-            onClick={playPause} 
+            className="player__icon--play"
+            icon={isPlaying ? faCirclePause : faCirclePlay}
+            onClick={playPause}
           />
         </Link>
 
@@ -93,21 +97,15 @@ const Player = ({ duration, randomIdFromArtist, randomId2FromArtist, audio }) =>
       </div>
 
       <div className="player__progress">
-        {/* Exibe o tempo atual da música */}
         <p>{formattedCurrentTime}</p>
-
         <div className="player__bar" onClick={handleProgressClick}>
-            <div ref={progressBar} className="player__bar-progress"></div>
+          <div ref={progressBar} className="player__bar-progress"></div>
         </div>
-
-        {/* Exibe a duração total formatada */}
         <p>{formattedDuration}</p>
       </div>
 
       <audio ref={audioPlayer} src={audio} />
-
       <VolumeControl audioRef={audioPlayer} />
-
     </div>
   );
 };
