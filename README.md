@@ -6,7 +6,7 @@ Uma aplicação web que imita as principais funcionalidades do Spotify, como rep
 
 Você pode visualizar uma demonstração do aplicativo, do design e funcionalidades no vídeo abaixo:
 
-
+https://github.com/user-attachments/assets/1597724a-0f8b-4d10-8c14-d8a207d9e5ba
 
 ## Tecnologias Usadas
 
